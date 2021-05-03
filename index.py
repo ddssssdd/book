@@ -5,6 +5,9 @@ import pymysql;
 
 app = Flask(__name__);
 
+def getDb():
+    db = pymysql.connect(host="127.0.0.1",user="sfu",password="P@ss!2#4%6",database="test_db",port=3307);
+    return db;
 
 
 @app.route("/")
@@ -13,7 +16,7 @@ def index():
 
 @app.route("/book/<bookId>/<urlId>")
 def book(bookId,urlId):
-    db = pymysql.connect("127.0.0.1","sfu","P@ss!2#4%6","test_db",3307);
+    db = getDb();
     cursor = db.cursor();
     cursor.execute("select title,content,`index` from book_content where bookId=%s and `index`=%s" % (bookId,urlId));
     book = cursor.fetchone()
@@ -25,7 +28,7 @@ def book(bookId,urlId):
 
 @app.route("/list/<bookId>")
 def list(bookId):
-    db = pymysql.connect("127.0.0.1","sfu","P@ss!2#4%6","test_db",3307);
+    db = getDb();
     cursor = db.cursor();
     cursor.execute("select title,content,`index` from book_content where bookId=%s" % (bookId));
     urls = cursor.fetchall();
@@ -35,14 +38,14 @@ def list(bookId):
     return render_template("list.html",urls=urls,bookId=bookId,bookName=bookName);
 @app.route("/home/")
 def home():
-    db = pymysql.connect("127.0.0.1","sfu","P@ss!2#4%6","test_db",3307);
+    db = getDb();
     cursor = db.cursor();
     cursor.execute("select bookId,url,title,author from book_list");
     books = cursor.fetchall();
     return render_template("home.html",books=books);
 @app.route("/bookRemove/<bookId>")
 def bookRemove(bookId):
-    db = pymysql.connect("127.0.0.1","sfu","P@ss!2#4%6","test_db",3307);
+    db = getDb();
     cursor = db.cursor();
     cursor.execute("delete from book_list where bookId=%s" % (bookId));
     db.commit();
@@ -54,14 +57,14 @@ def bookAdd():
     url = request.form.get("url");
     title = request.form.get("title");
     author = request.form.get("author");
-    db = pymysql.connect("127.0.0.1","sfu","P@ss!2#4%6","test_db",3307);
+    db = getDb();
     cursor = db.cursor();
     cursor.execute("insert into book_list(bookId,url,title,author) values(%s,'%s','%s','%s')" % (bookId,url,title,author));
     db.commit();
     return redirect(url_for("home"));
 @app.route("/updateBook/<bookId>")
 def updateBook(bookId):
-    db = pymysql.connect("127.0.0.1","sfu","P@ss!2#4%6","test_db",3307);
+    db = getDb();
     c2 = db.cursor();
     c2.execute("select title,url,last_update from book_list where bookId=%s" % (bookId));
     rs = c2.fetchone();
@@ -73,7 +76,7 @@ def updateBookFromInternetv2(bookId,urlBook):
     indexPage = session.get(urlBook);
     urls = indexPage.html.find("#list a");
     i = 1;
-    db = pymysql.connect("127.0.0.1","sfu","P@ss!2#4%6","test_db",3307);
+    db = getDb();
     q = db.cursor();
     beginUpdate = 0;
     lastUpdate = 'unknown';
@@ -113,7 +116,7 @@ def updateBookFromInternet(bookId,urlBook):
     indexPage = session.get(urlBook);
     urls = indexPage.html.find("#list a");
     i = 1;
-    db = pymysql.connect("127.0.0.1","sfu","P@ss!2#4%6","test_db",3307);
+    db = getDb();
     q = db.cursor();
     for item in urls:
         #print(item.text);
